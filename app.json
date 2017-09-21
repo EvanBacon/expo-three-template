@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "expo-three-template",
+    "description": "An empty new project",
+    "slug": "expo-three-template",
+    "privacy": "public",
+    "sdkVersion": "20.0.0",
+    "version": "1.0.0",
+    "primaryColor": "#cccccc",
+    "icon": "./assets/icons/app-icon.png",
+    "loading": {
+      "icon": "./assets/icons/loading-icon.png",
+      "hideExponentText": false
+    },
+    "packagerOpts": {
+      "assetExts": ["ttf", "mp4", "obj"]
+    },
+    "ios": {
+      "supportsTablet": true
+    }
+  }
+}
