@@ -11,21 +11,6 @@ import './window/domElement';
 import './window/resize';
 import Touches from './window/Touches';
 
-
-
-// Currently only supporting orbit - this is just a reference
-const ControlType = {
-  orbit: 'orbit',
-  trackBall: 'trackBall',
-  orthoTrackBall: 'orthoTrackBall',
-  drag: 'drag',
-  pointerLock: 'pointerLock',
-  fly: 'fly',
-  firstPerson: 'firstPerson',
-  orientation: 'orientation',
-  transform: 'transform'
-}
-
 class App extends React.Component {
   render = () => (
     <ThreeView
@@ -38,24 +23,28 @@ class App extends React.Component {
 
   _onContextCreate = async (gl) => {
     const { innerWidth: width, innerHeight: height } = window;
+
+    // renderer
+
     this.renderer = ExpoTHREE.createRenderer({ gl });
     this.renderer.setPixelRatio( window.devicePixelRatio );    
     this.renderer.setSize(width, height);
     this.renderer.setClearColor(0x000000, 1.0);
 
+    // scene
+
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0xcccccc);
     this.scene.fog = new THREE.FogExp2(0xcccccc, 0.002);
+
+    // camera
 
     this.camera = new THREE.PerspectiveCamera(50, width / height, 1, 1000);
     this.camera.position.z = 500;
     this.camera.lookAt(new THREE.Vector3());
 
-    const geo = new THREE.BoxGeometry(1,1,1)
-    const mat = new THREE.MeshBasicMaterial({ wireframe: true, color: 0xffffff })
-    const box = new THREE.Mesh(geo, mat)
-    this.scene.add(box)
-    
+    // controls
+
     this.controls = new OrbitControls(this.camera);
     // this.controls.addEventListener('change', this._render); // remove when using animation loop
 
@@ -89,14 +78,15 @@ class App extends React.Component {
     light = new THREE.AmbientLight(0x222222);
     this.scene.add(light);
 
+    // resize listener
+
     window.addEventListener('resize', this._onWindowResize, false);
   }
 
   _onWindowResize = () => {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
-
-    this.renderer.setPixelRatio( window.devicePixelRatio );        
+    this.renderer.setPixelRatio( window.devicePixelRatio );
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
@@ -113,4 +103,5 @@ class App extends React.Component {
   }
 }
 
+// Wrap Touches Event Listener
 export default Touches(App);
