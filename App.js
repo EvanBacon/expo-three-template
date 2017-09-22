@@ -10,6 +10,7 @@ import './Three';
 import './window/domElement';
 import './window/resize';
 import Touches from './window/Touches';
+import DeviceMotion from './window/Touches';
 
 class App extends React.Component {
   render = () => (
@@ -57,6 +58,9 @@ class App extends React.Component {
 
     // controls
 
+    // VR Controls
+    // this.controls = new THREE.DeviceOrientationControls(this.camera);
+    
     this.controls = new OrbitControls(this.camera);
     // this.controls.addEventListener('change', this._render); // remove when using animation loop
 
@@ -141,4 +145,6 @@ class App extends React.Component {
 // Wrap Touches Event Listener
 const TouchesComponent = Touches(App);
 
+// Wrap Device Motion for VR use
+// const DeviceMotionComponent = DeviceMotion(TouchesComponent);
 export default TouchesComponent;
