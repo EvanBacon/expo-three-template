@@ -9,7 +9,7 @@
     "expo": "^21.0.1",
     "expo-three": "^2.0.1",
     "react": "16.0.0-alpha.12",
-    "react-native": "https://github.com/expo/react-native/archive/sdk-20.0.0.tar.gz",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-21.0.0.tar.gz",
     "three": "^0.87.1",
     "three-orbit-controls": "^82.1.0"
   }
