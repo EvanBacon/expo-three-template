@@ -16,6 +16,12 @@ export default class ThreeView extends React.Component {
     );
 
     _onGLContextCreate = async (gl) => {
+        // Stubby
+        gl.createRenderbuffer = (() => { });
+        gl.bindRenderbuffer = (() => { });
+        gl.renderbufferStorage = (() => { });
+        gl.framebufferRenderbuffer = (() => { });
+
         await this.props.onContextCreate(gl);
 
         const render = () => {

@@ -23,13 +23,6 @@ class App extends React.Component {
 
   _onContextCreate = async (gl) => {
 
-    // Stubby
-    
-    gl.createRenderbuffer = (() => {});
-    gl.bindRenderbuffer = (() => {});
-    gl.renderbufferStorage = (() => {});
-    gl.framebufferRenderbuffer = (() => {});
-
     const { innerWidth: width, innerHeight: height } = window;
 
     // renderer
