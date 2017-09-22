@@ -22,6 +22,14 @@ class App extends React.Component {
   //render={_=> {}} to disable loop
 
   _onContextCreate = async (gl) => {
+
+    // Stubby
+    
+    gl.createRenderbuffer = (() => {});
+    gl.bindRenderbuffer = (() => {});
+    gl.renderbufferStorage = (() => {});
+    gl.framebufferRenderbuffer = (() => {});
+
     const { innerWidth: width, innerHeight: height } = window;
 
     // renderer

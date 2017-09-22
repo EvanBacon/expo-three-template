@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "expo-three-template",
+    "name": "Three Template",
     "description": "An empty new project",
     "slug": "expo-three-template",
     "privacy": "public",
     "sdkVersion": "20.0.0",
     "version": "1.0.0",
-    "primaryColor": "#cccccc",
+    "primaryColor": "#ccccf8",
     "icon": "./assets/icons/app-icon.png",
     "loading": {
       "icon": "./assets/icons/loading-icon.png",
