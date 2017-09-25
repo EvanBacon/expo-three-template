@@ -83,10 +83,10 @@ class App extends React.Component {
 
     // setup custom world
 
-    this._setupWorld();
+    await this._setupWorld();
   }
 
-  _setupWorld = () => {
+  _setupWorld = async () => {
 
      // Rotating cube
 
@@ -105,7 +105,7 @@ class App extends React.Component {
     // Random Items
 
     const geometry = new THREE.CylinderGeometry(0, 10, 30, 4, 1);
-    const material = new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true });
+    const material = new THREE.MeshPhongMaterial({ color: 0xff00ff, flatShading: true });
 
     for (var i = 0; i < 500; i++) {
       const mesh = new THREE.Mesh(geometry, material);
