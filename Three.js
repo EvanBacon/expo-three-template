@@ -4,6 +4,8 @@ export default THREE;
 
 // Controls used for VR 
 require('three/examples/js/controls/DeviceOrientationControls');
+require('three/examples/js/loaders/OBJLoader');
+require('three/examples/js/loaders/ColladaLoader2');
 
 if (!console.time) {
     console.time = () => { };

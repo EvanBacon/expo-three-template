@@ -11,6 +11,7 @@
     "react": "16.0.0-alpha.12",
     "react-native": "https://github.com/expo/react-native/archive/sdk-21.0.0.tar.gz",
     "three": "^0.87.1",
-    "three-orbit-controls": "^82.1.0"
+    "three-orbit-controls": "^82.1.0",
+    "xmldom": "^0.1.27"
   }
 }
