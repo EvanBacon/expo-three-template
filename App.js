@@ -5,72 +5,6 @@ import ExpoTHREE from 'expo-three';
 const OrbitControls = require('three-orbit-controls')(THREE);
 import { ImageLoader } from 'three/src/loaders/ImageLoader';
 
-import ThreeView from './ThreeView';
-window.DOMParser = require('xmldom').DOMParser;
-
-const _assetStore = {
-  "INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Body_D.png": require('./model/INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Body_D.png'),
-  "INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Rim_D.png": require('./model/INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Rim_D.png'),
-  "INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Tire_D.png": require('./model/INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Tire_D.png'),
-};
-const cachedAssetStore = {
-  "INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Body_D.png": require('./model/INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Body_D.png'),
-  "INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Rim_D.png": require('./model/INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Rim_D.png'),
-  "INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Tire_D.png": require('./model/INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Tire_D.png'),
-};
-
-import arrayFromObject from './util/arrayFromObject';
-import cacheAssetsAsync from './util/cacheAssetsAsync';
-const loadAssets = async () => {
-  const images = arrayFromObject(_assetStore);
-  await cacheAssetsAsync({
-    images,
-  });
-
-  Object.keys(_assetStore).map(key => {
-    cachedAssetStore[key] = Expo.Asset.fromModule(_assetStore[key]);
-  });
-}
-
-THREE.TextureLoader.prototype.load = function (url, onLoad, onProgress, onError) {
-  const loader = new ImageLoader(this.manager);
-  loader.setCrossOrigin(this.crossOrigin);
-  loader.setPath(this.path);
-
-  const texture = new THREE.Texture();
-  texture.minFilter = THREE.LinearFilter; // Pass-through non-power-of-two
-
-  if (cachedAssetStore.hasOwnProperty(url)) {
-    // This should already be downloaded.
-    const asset = cachedAssetStore[url];
-    console.warn("DG_TEX: Load texture ", url);
-    (async () => {
-      // But try to download anyways...
-      if (!asset.localUri) {
-        await asset.downloadAsync();
-      }
-
-      texture.image = {
-        data: asset,
-        width: asset.width,
-        height: asset.height,
-      };
-
-      texture.needsUpdate = true;
-      texture.isDataTexture = true; // Forces passing to `gl.texImage2D(...)` verbatim
-
-      if (onLoad !== undefined) {
-        onLoad(texture);
-      }
-    })();
-  } else {
-    console.warn("DG_TEX: Invalid Texture URL: Not in data store", url);
-  }
-  return texture
-};
-
-
-const AR = false;
 
 import './Three';
 import './window/domElement';
@@ -78,51 +12,66 @@ import './window/resize';
 import Touches from './window/Touches';
 import DeviceMotion from './window/Touches';
 
+import ThreeView from './ThreeView';
+window.DOMParser = require('xmldom').DOMParser;
 
-const StereoEffect = function (renderer) {
+import './TextureLoader';
 
-  var _stereo = new THREE.StereoCamera();
-  _stereo.aspect = 0.5;
+import StereoEffect from './StereoEffect';
 
-  this.setEyeSeparation = function (eyeSep) {
 
-    _stereo.eyeSep = eyeSep;
+const AR = false;
 
-  };
 
-  this.setSize = function (width, height) {
+/// Assets Shim
 
-    renderer.setSize(width, height);
+import arrayFromObject from './util/arrayFromObject';
+import cacheAssetsAsync from './util/cacheAssetsAsync';
 
-  };
-
-  this.render = function (scene, camera, gl) {
-
-    scene.updateMatrixWorld();
-
-    if (camera.parent === null) camera.updateMatrixWorld();
-
-    _stereo.update(camera);
-    renderer.render(scene, camera);
-
-    var size = renderer.getSize();
-
-    if (renderer.autoClear) renderer.clear();
-    renderer.setScissorTest(true);
-
-    renderer.setScissor(0, 0, size.width / 2, size.height);
-    renderer.setViewport(0, 0, size.width / 2, size.height);
-    renderer.render(scene, _stereo.cameraL);
-
-    renderer.setScissor(size.width / 2, 0, size.width / 2, size.height);
-    renderer.setViewport(size.width / 2, 0, size.width / 2, size.height);
-    renderer.render(scene, _stereo.cameraR);
-
-    renderer.setScissorTest(false);
-
-  };
-
+global.globalCachedAssetStore = {
 };
+
+const _assetStore = {
+  "INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Body_D.png": require('./model/INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Body_D.png'),
+  "INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Rim_D.png": require('./model/INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Rim_D.png'),
+  "INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Tire_D.png": require('./model/INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Tire_D.png'),
+};
+
+const loadAssets = async () => {
+  const images = arrayFromObject(_assetStore);
+  await cacheAssetsAsync({
+    images,
+  });
+
+  Object.keys(_assetStore).map(key => {
+    globalCachedAssetStore[key] = Expo.Asset.fromModule(_assetStore[key]);
+  });
+}
+
+// End: Assets Shim
+
+const feetToMeters = feet => feet * 3.28084;
+
+const alignMesh = (mesh, axis = { x: 0.5, y: 0.5, z: 0.5 }) => {
+  axis = axis || {};
+  const box = new THREE.Box3().setFromObject(mesh);
+
+  const size = box.size();
+  const { max } = box;
+  const min = { x: -box.min.x, y: -box.min.y, z: -box.min.z };
+
+  Object.keys(axis).map(key => {
+    const scale = axis[key];
+    mesh.position[key] = (min[key] - size[key]) + (size[key] * scale);
+  });
+}
+
+const scaleLongestSideToSize = (mesh, size) => {
+  const { x: width, y: height, z: depth } = new THREE.Box3().setFromObject(mesh).size();
+  const longest = Math.max(width, Math.max(height, depth));
+  const scale = size / longest;
+  mesh.scale.set(scale, scale, scale);
+}
 
 class App extends React.Component {
   state = { assetsLoaded: false };
@@ -141,17 +90,22 @@ class App extends React.Component {
       />
     );
   }
+
   async componentWillMount() {
     await loadAssets();
-
     StatusBar.setHidden(true);
     // Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.LANDSCAPE_LEFT);
     this.setState({ assetsLoaded: true });
 
   }
+
   _onContextCreate = async (gl, arSession) => {
 
-    const { innerWidth: width, innerHeight: height, devicePixelRatio: scale } = window;
+    const {
+      innerWidth: width,
+      innerHeight: height,
+      devicePixelRatio: scale
+    } = window;
 
     // renderer
 
@@ -165,7 +119,6 @@ class App extends React.Component {
     // this.effect = new StereoEffect(this.renderer);
 
     // scene
-
     this.scene = new THREE.Scene();
 
     if (AR) {
@@ -177,13 +130,7 @@ class App extends React.Component {
       this.scene.fog = new THREE.FogExp2(0xcccccc, 0.002);
     }
 
-
-
-
     // camera
-
-    /// AR/VR Camera
-
     if (AR) {
       this.camera = ExpoTHREE.createARCamera(arSession, width, height, 0.01, 1000);
     } else {
@@ -192,30 +139,15 @@ class App extends React.Component {
       this.camera.lookAt(new THREE.Vector3());
     }
 
-
-    // const crosshair = new THREE.Mesh(
-    //   new THREE.RingGeometry( 0.02, 0.04, 32 ),
-    //   new THREE.MeshBasicMaterial( {
-    //     color: 0xffffff,
-    //     opacity: 0.5,
-    //     transparent: true
-    //   } )
-    // );
-    // crosshair.position.z = - 2;
-    // this.camera.add( crosshair );
-
     // controls
-
     if (!AR) {
       this.controls = new THREE.DeviceOrientationControls(this.camera);
 
       this.controls = new OrbitControls(this.camera);
       this.controls.addEventListener('change', this._render); // remove when using animation loop
-
     }
 
     // lights
-
     this.scene.add(new THREE.AmbientLight(0x666666, .8));
 
     let light = new THREE.DirectionalLight(0xdfebff, 1.75);
@@ -247,40 +179,6 @@ class App extends React.Component {
 
   _setupWorld = async () => {
 
-    // Rotating cube
-
-    // this.cube = new THREE.Mesh(
-    //   new THREE.BoxGeometry(0.07, 0.07, 0.07),
-    //   new THREE.MeshBasicMaterial({
-    //     map: await ExpoTHREE.createTextureAsync({
-    //       asset: Expo.Asset.fromModule(require('./assets/icons/app-icon.png')),
-    //     }),
-    //   })
-    // );
-    // this.cube.position.z = -0.4;
-    // // this.scene.add(this.cube);
-
-
-    // // Random Items
-
-    // const geometry = new THREE.CylinderGeometry(0, 0.07, 0.03, 4, 1);
-    // const material = new THREE.MeshPhongMaterial({ color: 0xff00ff, flatShading: true });
-
-    // for (var i = 0; i < 100; i++) {
-    //   const scalar = 2;
-    //   const mesh = new THREE.Mesh(geometry, material);
-    //   mesh.position.x = ((Math.random() - 0.5) * scalar)
-    //   mesh.position.y = ((Math.random() - 0.5) * scalar)
-    //   mesh.position.z = ((Math.random() - 0.5) * scalar)
-
-    //   // mesh.position.x = (Math.random() - 0.5) * scalar;
-    //   // mesh.position.y = (Math.random() - 0.5) * scalar;
-    //   // mesh.position.z = (Math.random() - 0.5) * scalar;
-    //   mesh.updateMatrix();
-    //   mesh.matrixAutoUpdate = false;
-    //   this.scene.add(mesh);
-    // }
-
 
     // const loadTexture = res => ExpoTHREE.createTextureAsync({
     //     asset: Expo.Asset.fromModule(res),
@@ -309,26 +207,16 @@ class App extends React.Component {
     loader.options.convertUpAxis = true;
     // loader.setCrossOrigin('assets/models/stormtrooper/');
     loader.load(asset.localUri, (collada) => {
-      // const animations = collada.animations;
+      const animations = collada.animations;
       this.avatar = collada.scene;
       // this.mixer = new THREE.AnimationMixer(avatar);
       // const action = this.mixer.clipAction(animations[0]).play();
       this.scene.add(this.avatar);
-      // this.avatar.position.y = -1;
-      
-      // const _scale = 1;
-      // this.avatar.scale.set(_scale, _scale, _scale);
-      // this.avatar.material = material;
 
-      this.scaleLongestSideToSize(this.avatar, 1);
-      
-      this.alignMesh(this.avatar, { x: 0.5, y: 1, z: 0.5 });
-      
-      
+      scaleLongestSideToSize(this.avatar, 6.28);
+      alignMesh(this.avatar, { x: 0.5, y: 1, z: 0.5 });
 
-      var helper = new THREE.SkeletonHelper(this.avatar);
-      helper.material.linewidth = 3;
-      this.scene.add(helper);
+      this.addSkeleton(this.avatar);
 
       console.warn("Model Loaded")
     }, progress => {
@@ -354,55 +242,19 @@ class App extends React.Component {
       meters: 10,
       divisions: 20
     });
-
-    // this.scene.add(new THREE.GridHelper(10, 10 * 3.28084));
   }
 
+  addSkeleton = (mesh) => {
+    if (this.scene ) {
+      const helper = new THREE.SkeletonHelper(mesh);
+      helper.material.linewidth = 3;
+      this.scene.add(helper);
+    }
+  }
   addGrid = ({ meters, divisions }) => {
     if (this.scene && meters && divisions) {
       this.scene.add(new THREE.GridHelper(meters, divisions));
     }
-  }
-
-  alignMesh = (mesh, axis = {x: 0.5, y: 0.5, z: 0.5} ) => {
-    axis = axis || {};
-    const box = new THREE.Box3().setFromObject(mesh);
-    const size = box.size();
-    let {min, max} = box;
-    min = {x: -min.x, y: -min.y, z: -min.z};
-    const half = {width: size.x / 2, height: size.y / 2, depth: size.z / 2 };
-
-  
-    Object.keys(axis).map(key => {
-      const scale = axis[key];
-
-      mesh.position[key] = (min[key] - size[key]) + (size[key] * scale);
-    })
-    
-    // mesh.position.set(min.x - half.width, min.y - half.height, min.z - half.depth);
-
-  }
-
-  centerMesh = (mesh) => {
-    const box = new THREE.Box3().setFromObject(mesh);
-    const size = box.size();
-    const { x, y, z } = box.min;
-    const min = {x: -x, y: -y, z: -z};
-    const half = {width: size.x / 2, height: size.y / 2, depth: size.z / 2 };
-    mesh.position.set(min.x - half.width, min.y - half.height, min.z - half.depth);
-  }
-
-  scaleLongestSideToSize = (mesh, size) => {
-    const { x: width, y: height, z: depth } = this.getSize(mesh);
-    const longest = Math.max(width, Math.max(height, depth));
-    const scale = size / longest;
-    mesh.scale.set(scale, scale, scale);
-  }
-
-  getSize = (mesh) => {
-    const box = new THREE.Box3().setFromObject(mesh);
-    console.warn("size", box.min, box.max, box.size());
-    return box.size();
   }
 
   _onWindowResize = () => {
