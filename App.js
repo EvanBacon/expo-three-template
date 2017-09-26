@@ -6,9 +6,7 @@ const OrbitControls = require('three-orbit-controls')(THREE);
 import { ImageLoader } from 'three/src/loaders/ImageLoader';
 
 import ThreeView from './ThreeView';
-
 window.DOMParser = require('xmldom').DOMParser;
-
 
 const _assetStore = {
   "INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Body_D.png": require('./model/INJ_iOS_VEHICLE_Batmobile_Arkham_Knight_Body_D.png'),
@@ -45,7 +43,7 @@ THREE.TextureLoader.prototype.load = function (url, onLoad, onProgress, onError)
   if (cachedAssetStore.hasOwnProperty(url)) {
     // This should already be downloaded.
     const asset = cachedAssetStore[url];
-    console.warn("Load texture ", url);
+    console.warn("DG_TEX: Load texture ", url);
     (async () => {
       // But try to download anyways...
       if (!asset.localUri) {
@@ -66,7 +64,7 @@ THREE.TextureLoader.prototype.load = function (url, onLoad, onProgress, onError)
       }
     })();
   } else {
-    console.warn("Invalid Texture URL: Not in data store", url);
+    console.warn("DG_TEX: Invalid Texture URL: Not in data store", url);
   }
   return texture
 };
@@ -189,8 +187,8 @@ class App extends React.Component {
     if (AR) {
       this.camera = ExpoTHREE.createARCamera(arSession, width, height, 0.01, 1000);
     } else {
-      this.camera = new THREE.PerspectiveCamera(50, width / height, 1, 1000);
-      this.camera.position.z = 10;
+      this.camera = new THREE.PerspectiveCamera(50, width / height, 0.01, 100);
+      this.camera.position.z = 5;
       this.camera.lookAt(new THREE.Vector3());
     }
 
@@ -322,9 +320,11 @@ class App extends React.Component {
       // this.avatar.scale.set(_scale, _scale, _scale);
       // this.avatar.material = material;
 
-      this.centerMesh(this.avatar);
+      this.scaleLongestSideToSize(this.avatar, 1);
       
-      // this.scaleLongestSideToSize(this.avatar, 1);
+      this.alignMesh(this.avatar, { x: 0.5, y: 1, z: 0.5 });
+      
+      
 
       var helper = new THREE.SkeletonHelper(this.avatar);
       helper.material.linewidth = 3;
@@ -364,6 +364,25 @@ class App extends React.Component {
     }
   }
 
+  alignMesh = (mesh, axis = {x: 0.5, y: 0.5, z: 0.5} ) => {
+    axis = axis || {};
+    const box = new THREE.Box3().setFromObject(mesh);
+    const size = box.size();
+    let {min, max} = box;
+    min = {x: -min.x, y: -min.y, z: -min.z};
+    const half = {width: size.x / 2, height: size.y / 2, depth: size.z / 2 };
+
+  
+    Object.keys(axis).map(key => {
+      const scale = axis[key];
+
+      mesh.position[key] = (min[key] - size[key]) + (size[key] * scale);
+    })
+    
+    // mesh.position.set(min.x - half.width, min.y - half.height, min.z - half.depth);
+
+  }
+
   centerMesh = (mesh) => {
     const box = new THREE.Box3().setFromObject(mesh);
     const size = box.size();
@@ -372,6 +391,7 @@ class App extends React.Component {
     const half = {width: size.x / 2, height: size.y / 2, depth: size.z / 2 };
     mesh.position.set(min.x - half.width, min.y - half.height, min.z - half.depth);
   }
+
   scaleLongestSideToSize = (mesh, size) => {
     const { x: width, y: height, z: depth } = this.getSize(mesh);
     const longest = Math.max(width, Math.max(height, depth));
