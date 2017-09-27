@@ -135,7 +135,7 @@ class App extends React.Component {
       this.camera = ExpoTHREE.createARCamera(arSession, width, height, 0.01, 1000);
     } else {
       this.camera = new THREE.PerspectiveCamera(50, width / height, 0.01, 100);
-      this.camera.position.z = 5;
+      this.camera.position.z = 7;
       this.camera.lookAt(new THREE.Vector3());
     }
 
