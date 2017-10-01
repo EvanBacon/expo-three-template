@@ -8,7 +8,6 @@ import './Three';
 import './window/domElement';
 import './window/resize';
 import Touches from './window/Touches';
-import DeviceMotion from './window/Touches';
 
 const AR = true;
 

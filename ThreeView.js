@@ -10,12 +10,28 @@ export default class ThreeView extends React.Component {
         render: PropTypes.func.isRequired,
         enableAR: PropTypes.bool,
     }
-    render = () => (
-        <Expo.GLView
-            nativeRef_EXPERIMENTAL={this._setNativeGLView}
-            style={{ flex: 1 }}
-            onContextCreate={this._onGLContextCreate} />
-    );
+    render = () => {
+        if (!Expo.Constants.isDevice) {
+            return (
+                <View
+                    style={{
+                        backgroundColor: 'red',
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}>
+                    <Text>Can't Run GLView in Simulator :(</Text>
+                </View>
+            )
+        }
+
+        return (
+            <Expo.GLView
+                nativeRef_EXPERIMENTAL={this._setNativeGLView}
+                style={{ flex: 1 }}
+                onContextCreate={this._onGLContextCreate} />
+        );
+    }
 
     _setNativeGLView = ref => {
         this._nativeGLView = ref;
