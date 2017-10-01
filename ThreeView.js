@@ -1,6 +1,6 @@
 import Expo from 'expo';
 import React from 'react';
-import { findNodeHandle, NativeModules, View } from 'react-native';
+import { findNodeHandle, NativeModules, View, Text } from 'react-native';
 import ExpoTHREE from 'expo-three';
 import PropTypes from 'prop-types';
 export default class ThreeView extends React.Component {
