@@ -11,7 +11,7 @@ class Scene extends React.Component {
         onFinishedLoading: (() => { }),
     }
 
-    AR = false;
+    AR = true;
 
     shouldComponentUpdate(nextProps, nextState) {
         const { props, state } = this;
