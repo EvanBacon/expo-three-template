@@ -1,9 +1,9 @@
 import Expo from 'expo';
 import React from 'react';
 import ExpoTHREE from 'expo-three';
-import ThreeView from '../ThreeView';
 import Touches from '../window/Touches';
 import Files from '../Files';
+import {ThreeView} from './index';
 
 class Scene extends React.Component {
     static defaultProps = {
@@ -11,7 +11,7 @@ class Scene extends React.Component {
         onFinishedLoading: (() => { }),
     }
 
-    AR = true;
+    AR = false;
 
     shouldComponentUpdate(nextProps, nextState) {
         const { props, state } = this;
