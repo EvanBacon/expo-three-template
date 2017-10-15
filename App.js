@@ -7,6 +7,8 @@ import ThreeView from './ThreeView';
 import './Three';
 import './window/domElement';
 import './window/resize';
+import './window/DOMParser';
+
 import Touches from './window/Touches';
 
 const AR = true;
