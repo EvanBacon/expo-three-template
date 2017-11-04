@@ -6,11 +6,12 @@
   "private": true,
   "main": "node_modules/expo/AppEntry.js",
   "dependencies": {
-    "expo": "^21.0.1",
+    "expo": "^22.0.2",
     "react": "16.0.0",
-    "react-native": "https://github.com/expo/react-native/archive/sdk-21.0.0.tar.gz",
-    "three": "^0.87.1",
+    "react-native":
+      "https://github.com/expo/react-native/archive/sdk-22.0.2.tar.gz",
+    "three": "^0.88.0",
     "expo-three": "^2.0.1",
-    "xmldom-qsa": "1.0.3"    
+    "xmldom-qsa": "1.0.3"
   }
 }
